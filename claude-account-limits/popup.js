@@ -1,6 +1,18 @@
 const list = document.getElementById('accounts');
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+const panels = tabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')));
 const prefix = 'aiwise.account.';
 const staleAfterMs = 24 * 60 * 60 * 1000;
+
+tabs.forEach((tab, selectedIndex) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach((item, index) => {
+      const selected = index === selectedIndex;
+      item.setAttribute('aria-selected', String(selected));
+      panels[index].hidden = !selected;
+    });
+  });
+});
 
 function line(className, text) {
   const element = document.createElement('p');
