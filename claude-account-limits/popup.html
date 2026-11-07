@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Account Limits</title>
+  <style>
+    :root { color-scheme: dark; font: 13px/1.45 system-ui, sans-serif; background: #151519; color: #f4f4f5; }
+    body { box-sizing: border-box; margin: 0; width: 360px; max-height: 520px; padding: 16px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: 16px; letter-spacing: .01em; }
+    .caption { color: #9999a3; font-size: 11px; }
+    #accounts { display: grid; gap: 8px; }
+    .account { padding: 11px 12px; border: 1px solid #34343c; border-radius: 9px; background: #202026; }
+    .name { margin: 0 0 3px; font-weight: 650; overflow-wrap: anywhere; }
+    .status { margin: 0; color: #d2d2d8; }
+    .reset { margin: 3px 0 0; color: #f2c36d; font-weight: 600; }
+    .meta { margin: 5px 0 0; color: #92929d; font-size: 11px; }
+    .empty { margin: 0; color: #b8b8c0; }
+    footer { margin-top: 12px; color: #85858e; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <header><h1>Claude Account Limits</h1><span class="caption">Claude accounts</span></header>
+  <main id="accounts" aria-live="polite"></main>
+  <footer>Only Claude’s confirmed limit message counts as exhausted. Reset time passing does not confirm access.</footer>
+  <script src="popup.js"></script>
+</body>
+</html>
