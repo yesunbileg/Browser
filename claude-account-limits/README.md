@@ -1,6 +1,6 @@
 # Claude Account Limits
 
-A small Brave/Chromium extension that lists observed Claude account names and free-message limit reset times in the toolbar popup. It reads the limit banner shown by Claude and does not display a panel on the page.
+A small Brave/Chromium extension that lists observed Claude account names and free-message limit reset times in the toolbar popup. It reads the limit banner shown by Claude and does not display a panel on the page. Each limited account has a countdown and a non-editable time progress bar. The bar starts when the extension first detects the limit; it does not represent message quota. Older records without an observation start time show only the timer until a new limit is detected.
 
 ## Install
 

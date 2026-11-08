@@ -21,15 +21,28 @@
   }
 
   function recordForObservation(account, reset, observedAt, previous) {
+    const resetAt = resetTimestamp(reset, observedAt, previous);
+    const sameReset = previous && previous.resetLabel === reset.label && previous.resetAt === resetAt;
     return {
       accountId: account.id,
       accountName: account.name || 'Claude account',
       status: 'exhausted',
       resetLabel: reset.label,
-      resetAt: resetTimestamp(reset, observedAt, previous),
+      resetAt,
+      limitObservedAt: sameReset && Number.isFinite(previous.limitObservedAt)
+        ? previous.limitObservedAt
+        : observedAt,
       lastSeenAt: observedAt,
     };
   }
 
-  root.AIWiseUsageState = { storageKey, accountName, resetTimestamp, recordForObservation };
+  function observedWaitProgress(record, now) {
+    if (!record || !Number.isFinite(record.limitObservedAt) || !Number.isFinite(record.resetAt)
+      || Math.abs(record.limitObservedAt) > 8.64e15 || Math.abs(record.resetAt) > 8.64e15
+      || record.resetAt <= record.limitObservedAt) return null;
+    const progress = (now - record.limitObservedAt) / (record.resetAt - record.limitObservedAt);
+    return Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  }
+
+  root.AIWiseUsageState = { storageKey, accountName, resetTimestamp, recordForObservation, observedWaitProgress };
 })(globalThis);

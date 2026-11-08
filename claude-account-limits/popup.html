@@ -6,42 +6,59 @@
   <title>AIWise</title>
   <style>
     :root {
+      --background: #0f172a;
+      --foreground: #f8fafc;
+      --accent: #4ade80;
+      --border: #334155;
+      --muted: #cbd5e1;
+      --surface: #1b2639;
+      --surface-soft: #172338;
+
       color-scheme: dark;
-      font: 13px/1.45 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #111214;
-      color: #f3f4f4;
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      font-synthesis: none;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; width: 360px; max-height: 560px; overflow-y: auto; padding: 18px; }
+    body { margin: 0; width: 390px; max-width: 100vw; max-height: 600px; overflow-y: auto; padding: 20px; }
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 19px; }
-    .brand { display: flex; align-items: center; gap: 9px; color: #70d6a2; font-size: 17px; font-weight: 750; letter-spacing: -.035em; }
-    .brand-mark { display: grid; width: 27px; height: 27px; place-items: center; border: 1.5px solid #70d6a2; border-radius: 9px; font-size: 14px; font-weight: 800; line-height: 1; }
-    .actions { display: flex; align-items: center; gap: 14px; }
-    .action { border: 0; padding: 3px 0; background: transparent; color: #73dba5; font: inherit; font-size: 12px; font-weight: 600; }
-    .action:disabled { cursor: default; opacity: .7; }
-    .settings { display: grid; width: 24px; height: 24px; place-items: center; color: #797c80; font-size: 17px; }
-    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 17px; padding: 4px; border: 1px solid #2a2c2f; border-radius: 12px; background: #191a1d; }
-    .tab { min-height: 34px; border: 0; border-radius: 8px; background: transparent; color: #a4a7aa; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
-    .tab[aria-selected="true"] { background: #2a2c2e; color: #f5f6f5; box-shadow: 0 1px 3px #0008; }
-    .section-label { margin: 0 0 9px; color: #83878a; font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
-    #accounts { display: grid; gap: 8px; }
-    .account { padding: 12px 13px; border: 1px solid #2b2d2f; border-radius: 11px; background: #191a1c; }
-    .name { margin: 0 0 4px; color: #f2f3f1; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
-    .status { margin: 0; color: #c4c7c6; font-size: 12px; }
-    .reset { margin: 5px 0 0; color: #eac77d; font-size: 11px; font-weight: 600; }
-    .meta { margin: 6px 0 0; color: #777b7d; font-size: 10px; }
-    .empty, .unavailable { margin: 0; padding: 14px; border: 1px solid #2a2c2e; border-radius: 10px; background: #191a1c; color: #b4b7b6; font-size: 12px; }
-    .unavailable strong { display: block; margin-bottom: 4px; color: #ebedeb; font-size: 12px; }
-    footer { margin-top: 14px; color: #696d6f; font-size: 10px; line-height: 1.5; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--foreground); font-size: 19px; font-weight: 760; letter-spacing: -.04em; }
+    .brand-mark { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--accent); border-radius: 11px; color: var(--accent); background: #142b2a; }
+    .brand-mark svg { width: 18px; height: 18px; }
+    .account-total { padding: 5px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); background: var(--surface-soft); font-size: 12px; font-weight: 600; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 18px; padding: 4px; border: 1px solid #29364b; border-radius: 13px; background: #111d31; }
+    .tab { min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+    .tab[aria-selected="true"] { background: #26344b; color: #fff; box-shadow: 0 1px 3px #02061780; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin: 0 1px 10px; }
+    .section-label { margin: 0; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    .accounts { display: grid; gap: 10px; }
+    .account { padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 5px 16px #02061721; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .name { min-width: 0; margin: 1px 0 0; color: var(--foreground); font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+    .badge { flex: 0 0 auto; padding: 4px 8px; border-radius: 999px; color: #fed7aa; background: #3a2b21; font-size: 12px; font-weight: 650; }
+    .badge.unknown { color: var(--muted); background: #29364b; }
+    .status { margin: 10px 0 0; color: #e2e8f0; font-size: 13px; }
+    .countdown { display: block; margin-top: 4px; color: var(--foreground); font-size: 25px; font-variant-numeric: tabular-nums; font-weight: 720; letter-spacing: -.035em; line-height: 1.2; }
+    .reset-label { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .progress-wrap { margin-top: 14px; }
+    .progress-caption { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+    .progress-track { height: 7px; overflow: hidden; border-radius: 999px; background: var(--border); }
+    .progress-fill { height: 100%; border-radius: inherit; background: var(--accent); }
+    .progress-track.unmeasured { background: repeating-linear-gradient(135deg, var(--border) 0 5px, #25334a 5px 10px); }
+    .meta { margin: 12px 0 0; color: var(--muted); font-size: 12px; }
+    .empty, .unavailable { margin: 0; padding: 15px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface); color: #e2e8f0; font-size: 13px; }
+    .unavailable strong { display: block; margin-bottom: 4px; color: var(--foreground); font-size: 14px; }
+    footer { margin-top: 14px; padding: 11px 12px; border-radius: 11px; color: var(--muted); background: var(--surface-soft); font-size: 12px; line-height: 1.5; }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand" aria-label="AIWise"><span class="brand-mark" aria-hidden="true">A</span><span>AIWise</span></div>
-    <nav class="actions" aria-label="Menu actions">
-      <button class="action" type="button" disabled title="Bookmarks are unavailable">Bookmarks</button>
-      <button class="action settings" type="button" disabled aria-label="Settings unavailable" title="Settings are unavailable">⚙</button>
-    </nav>
+    <div class="brand" aria-label="AIWise"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18 10.5 5 16 18M7.1 13h6.8"/><path d="m17.5 9 3.5 9"/><path d="m19 5 3 3"/></svg></span><span>AIWise</span></div>
+    <span id="account-total" class="account-total">0 accounts</span>
   </header>
   <div class="tabs" role="tablist" aria-label="AI service">
     <button class="tab" type="button" role="tab" id="claude-tab" aria-selected="true" aria-controls="claude-panel">Claude</button>
@@ -49,14 +66,15 @@
   </div>
   <main>
     <section id="claude-panel" role="tabpanel" aria-labelledby="claude-tab">
-      <h1 class="section-label">Claude accounts</h1>
-      <div id="accounts" aria-live="polite"></div>
+      <div class="section-head"><h1 class="section-label">Claude accounts</h1></div>
+      <div id="accounts" class="accounts" aria-live="polite"></div>
     </section>
     <section id="gemini-panel" role="tabpanel" aria-labelledby="gemini-tab" hidden>
       <div class="unavailable"><strong>Gemini account tracking</strong>Gemini tracking is not configured.</div>
     </section>
   </main>
-  <footer>Only Claude’s confirmed limit message counts as exhausted. A passed reset time does not confirm access.</footer>
+  <footer>Progress starts when a limit is detected. Check Claude again after the reset time.</footer>
+  <script src="content-scripts/usage-state.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -6,17 +6,15 @@ const vm = require('node:vm');
 const html = fs.readFileSync(new URL('../popup.html', `file://${__filename}`), 'utf8');
 const script = fs.readFileSync(new URL('../popup.js', `file://${__filename}`), 'utf8');
 
-test('popup includes the AIWise menu header and Claude/Gemini tabs', () => {
+test('popup includes the AIWise menu header, account summary and Claude/Gemini tabs', () => {
   assert.match(html, /AIWise/);
-  assert.match(html, /Bookmarks/);
+  assert.match(html, /account-total/);
   assert.match(html, /Claude/);
   assert.match(html, /Gemini/);
   assert.match(html, /aria-selected="true"/);
 });
 
-test('unsupported menu actions and Gemini tracking are clearly marked', () => {
-  assert.match(html, /disabled[^>]*Bookmarks|Bookmarks[^>]*disabled/);
-  assert.match(html, /disabled[^>]*Settings|Settings[^>]*disabled/);
+test('unsupported Gemini tracking is clearly marked', () => {
   assert.match(html, /Gemini tracking is not configured/);
 });
 
@@ -38,14 +36,16 @@ test('selecting Gemini switches panels without claiming Gemini data', () => {
   const tabs = [makeTab('claude-panel', true), makeTab('gemini-panel', false)];
   const panels = { 'claude-panel': { hidden: false }, 'gemini-panel': { hidden: true } };
   const accounts = { replaceChildren() {}, append() {} };
+  const total = { textContent: '' };
   const context = {
     document: {
-      getElementById: (id) => id === 'accounts' ? accounts : panels[id],
+      getElementById: (id) => id === 'accounts' ? accounts : id === 'account-total' ? total : panels[id],
       querySelectorAll: () => tabs,
-      createElement: () => ({ append() {} }),
+      createElement: () => ({ append() {}, setAttribute() {}, style: {}, textContent: '' }),
     },
     chrome: { storage: { local: { get: async () => ({}) }, onChanged: { addListener() {} } } },
     window: { setInterval() {} },
+    globalThis: { AIWiseUsageState: { observedWaitProgress: () => null } },
     Date,
     Number,
     Object,

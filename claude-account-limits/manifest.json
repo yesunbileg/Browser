@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Claude Account Limits",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "See confirmed Claude free-message limits by account.",
   "action": {
     "default_popup": "popup.html",
