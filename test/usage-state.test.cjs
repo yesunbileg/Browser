@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync(new URL('../patch/usage-state.js', `file://${__filename}`), 'utf8');
+const source = fs.readFileSync(new URL('../AIWise/aiwise-patch/usage-state.js', `file://${__filename}`), 'utf8');
 const context = { globalThis: {} };
 vm.runInNewContext(source, context);
 const state = context.globalThis.AIWiseUsageState;

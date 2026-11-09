@@ -1,0 +1,100 @@
+{
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AIWise"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "save-selection": {
+      "description": "Save the selected text to AIWise",
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      }
+    }
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content-scripts/bookmark-capture.js",
+        "content-scripts/usage-bridge.js"
+      ],
+      "matches": [
+        "https://claude.ai/*",
+        "https://gemini.google.com/*"
+      ]
+    },
+    {
+      "js": [
+        "content-scripts/completion-capture.js",
+        "content-scripts/usage-capture.js"
+      ],
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "world": "MAIN"
+    },
+    {
+      "js": [
+        "content-scripts/gemini-capture.js"
+      ],
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "js": [
+        "aiwise-patch/usage-state.js",
+        "aiwise-patch/free-limit-parser.js",
+        "aiwise-patch/account-limit-watcher.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "description": "A battery meter for your Claude & Gemini usage limits — plus bookmark the best AI answers, code and tables in one place.",
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://gemini.google.com/*"
+  ],
+  "icons": {
+    "16": "icon/16.png",
+    "32": "icon/32.png",
+    "48": "icon/48.png",
+    "96": "icon/96.png",
+    "128": "icon/128.png"
+  },
+  "manifest_version": 3,
+  "name": "AIWise — Claude & Gemini Usage, Quota Tracker & Bookmarks",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "contextMenus",
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "version": "0.9.1",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://gemini.google.com/*"
+      ],
+      "resources": [
+        "content-scripts/bookmark-capture.css"
+      ],
+      "use_dynamic_url": true
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://claude.ai https://gemini.google.com"
+  }
+}

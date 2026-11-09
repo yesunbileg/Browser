@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const watcherSource = fs.readFileSync(new URL('../patch/account-limit-watcher.js', `file://${__filename}`), 'utf8');
+const watcherSource = fs.readFileSync(new URL('../AIWise/aiwise-patch/account-limit-watcher.js', `file://${__filename}`), 'utf8');
 
 function setup(firstResponse) {
   let now = 1_800_000_000_000;

@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = process.env.AIWISE_OUTPUT || '/home/home/Documents/AIWise-Free-Fix';
+const root = fileURLToPath(new URL('../AIWise/', import.meta.url));
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 
 test('staged manifest keeps donor capabilities and installs only the Claude observer', () => {

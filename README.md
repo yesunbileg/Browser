@@ -1,22 +1,17 @@
-# AIWise — Claude account limits
+# AIWise local fix
 
-The original AIWise menu with local Claude account names, confirmed free-message limits and reset countdowns. Bookmarks, Settings and Gemini keep their original interface. Tracking and the on-page usage widget are disabled.
+Complete unpacked extension with the original AIWise menu, Bookmarks, Settings and Gemini interface. The Claude account tracker and local reset countdowns are included. Tracking and the on-page usage widget are disabled.
 
-- Source: `aiwise-patch/`
-- Installed extension: `/home/home/Documents/AIWise-Free-Fix`
+## Install
 
-Rebuild the installed extension from the original local AIWise donor:
+Open `brave://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the `AIWise` folder. No build or separate donor files are required.
 
-```sh
-node aiwise-patch/apply.mjs
-```
+The current local installation is `/home/home/Documents/AIWise-Free-Fix`. Account observations stay in Chrome extension storage, not in this repository.
 
-`AIWISE_DONOR` and `AIWISE_OUTPUT` can override the original donor and output paths. Existing unrelated folders cannot be overwritten. Original vendor files remain local; this repository contains the patch code.
-
-Run checks:
+## Test
 
 ```sh
-node --test aiwise-patch/test/*.test.*
+node --test test/*.test.*
 ```
 
-A reset time passing does not confirm restored access. Account/container behavior depends on Brave's session isolation.
+This checkpoint contains the complete current extension. The reset-time and performance review fixes are the next changes.
