@@ -17,6 +17,16 @@
   },
   "content_scripts": [
     {
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "js": [
+        "aiwise-patch/network-capture.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
       "js": [
         "content-scripts/bookmark-capture.js",
         "content-scripts/usage-bridge.js"
@@ -50,14 +60,14 @@
         "https://claude.ai/*"
       ],
       "js": [
-        "aiwise-patch/usage-state.js",
         "aiwise-patch/free-limit-parser.js",
+        "aiwise-patch/usage-state.js",
         "aiwise-patch/account-limit-watcher.js"
       ],
       "run_at": "document_idle"
     }
   ],
-  "description": "A battery meter for your Claude & Gemini usage limits — plus bookmark the best AI answers, code and tables in one place.",
+  "description": "A battery meter for your Claude & Gemini usage limits \u2014 plus bookmark the best AI answers, code and tables in one place.",
   "host_permissions": [
     "https://claude.ai/*",
     "https://gemini.google.com/*"
@@ -70,7 +80,7 @@
     "128": "icon/128.png"
   },
   "manifest_version": 3,
-  "name": "AIWise — Claude & Gemini Usage, Quota Tracker & Bookmarks",
+  "name": "AIWise \u2014 Claude & Gemini Usage, Quota Tracker & Bookmarks",
   "permissions": [
     "storage",
     "alarms",
@@ -81,7 +91,7 @@
   "side_panel": {
     "default_path": "sidepanel.html"
   },
-  "version": "0.9.1",
+  "version": "0.9.2",
   "web_accessible_resources": [
     {
       "matches": [

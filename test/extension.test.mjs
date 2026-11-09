@@ -49,6 +49,27 @@ test('staged worker disables the analytics bridge but retains both message handl
 test('staging excludes Chrome verification metadata and leaves consent untouched', () => {
   assert.ok(!fs.existsSync(path.join(root, '_metadata')));
   const patch = read('aiwise-patch/popup-account-area.js');
-  assert.match(patch, /aiwise\.account\./);
+  assert.match(patch, /aiwise\.accountRecords/);
   assert.doesNotMatch(patch, /Sensor Tower|consent/i);
+});
+
+test('donor lock accepts pinned assets and rejects changed assets or versions', async () => {
+  const { webcrypto } = await import('node:crypto');
+  const { runInNewContext } = await import('node:vm');
+  const source = read('aiwise-patch/popup-account-area.js').split('async function startAccountArea()')[0];
+  const version = JSON.parse(read('manifest.json')).version;
+  function verify({ tamper = false, manifestVersion = version } = {}) {
+    return runInNewContext(`${source}\nverifyDonor()`, {
+      chrome: { runtime: { getURL: file => file, getManifest: () => ({ version: manifestVersion }) } },
+      crypto: webcrypto,
+      fetch: async file => ({
+        ok: true,
+        json: async () => JSON.parse(read(file)),
+        arrayBuffer: async () => new Uint8Array(tamper ? Buffer.from('modified donor') : fs.readFileSync(path.join(root, file))),
+      }),
+    });
+  }
+  await verify();
+  await assert.rejects(verify({ tamper: true }), /Unsupported donor asset/);
+  await assert.rejects(verify({ manifestVersion: '0.0.0' }), /Unsupported extension version/);
 });

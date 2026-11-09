@@ -1,5 +1,22 @@
-const root = document.getElementById('app');
-if (root) {
+async function verifyDonor() {
+  const response = await fetch(chrome.runtime.getURL('aiwise-patch/donor-lock.json'));
+  if (!response.ok) throw new Error('Donor lock unavailable');
+  const lock = await response.json();
+  if (chrome.runtime.getManifest().version !== lock.extensionVersion) throw new Error('Unsupported extension version');
+  for (const [file, expected] of Object.entries(lock.files)) {
+    const asset = await fetch(chrome.runtime.getURL(file));
+    if (!asset.ok) throw new Error('Donor asset missing');
+    const digest = await crypto.subtle.digest('SHA-256', await asset.arrayBuffer());
+    const actual = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    if (actual !== expected) throw new Error('Unsupported donor asset');
+  }
+}
+
+async function startAccountArea() {
+  const root = document.getElementById('app');
+  if (!root) return;
+  await verifyDonor();
+  const STORE = 'aiwise.accountRecords';
   const host = document.createElement('section');
   host.id = 'aiwise-confirmed-claude-limits';
   host.className = 'aiwise-limit-root';
@@ -44,7 +61,9 @@ if (root) {
     const heading = make('div', 'aiwise-limit-heading');
     heading.append(make('h3', 'aiwise-limit-name', record.accountName || 'Claude account'));
     const exhausted = record.status === 'exhausted';
-    heading.append(make('span', `aiwise-limit-badge${exhausted ? ' exhausted' : ''}`, exhausted ? 'Exhausted' : 'Unknown'));
+    const likely = record.status === 'likely_available';
+    const available = record.status === 'available';
+    heading.append(make('span', `aiwise-limit-badge${exhausted ? ' exhausted' : ''}`, exhausted ? 'Exhausted' : likely ? 'Check Claude' : available ? 'Available' : 'Unknown'));
     cardNode.append(heading);
     if (exhausted && validTime(record.resetAt) && record.resetAt > now) {
       cardNode.append(make('p', 'aiwise-limit-status', 'Free messages exhausted'));
@@ -68,6 +87,10 @@ if (root) {
       cardNode.append(make('p', 'aiwise-limit-status', validTime(record.resetAt)
         ? `Reset time passed (${record.resetLabel || 'unknown'}) · access unverified`
         : 'Free messages exhausted · reset time unavailable · access unverified'));
+    } else if (likely) {
+      cardNode.append(make('p', 'aiwise-limit-status', 'Reset time reached. Free messages may be available. Check Claude to confirm.'));
+    } else if (available) {
+      cardNode.append(make('p', 'aiwise-limit-status', 'Confirmed by a successful Claude response'));
     } else {
       cardNode.append(make('p', 'aiwise-limit-status', 'No confirmed limit observed'));
     }
@@ -77,10 +100,9 @@ if (root) {
   }
 
   async function render() {
-    const all = await chrome.storage.local.get(null);
-    const records = Object.entries(all)
-      .filter(([key, value]) => key.startsWith('aiwise.account.') && value && typeof value.accountId === 'string')
-      .map(([, value]) => value)
+    const all = await chrome.storage.local.get(STORE);
+    const records = Object.values(all[STORE] || {})
+      .filter(value => value && typeof value.accountId === 'string')
       .sort((a, b) => Number(b.status === 'exhausted') - Number(a.status === 'exhausted') || (a.accountName || '').localeCompare(b.accountName || ''));
     list.replaceChildren();
     if (!records.length) {
@@ -125,7 +147,14 @@ if (root) {
     if (!host.isConnected) syncVisibility();
   });
   observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-  chrome.storage.onChanged.addListener(() => void render());
+  chrome.storage.onChanged.addListener((changes, area) => { if (area === 'local' && changes[STORE]) void render(); });
   window.setInterval(() => void render(), 30_000);
+  detectProviderTab();
   void render();
 }
+void startAccountArea().catch(() => {
+  const alert = document.createElement('p');
+  alert.setAttribute('role', 'alert');
+  alert.textContent = 'This AIWise build does not match the pinned donor. Reload the verified extension.';
+  (document.querySelector('#app > div') || document.getElementById('app')).append(alert);
+});

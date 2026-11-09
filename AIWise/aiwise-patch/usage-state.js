@@ -11,28 +11,35 @@
   }
 
   function resetTimestamp(reset, observedAt, previous) {
-    if (previous && previous.resetLabel === reset.label && Number.isFinite(previous.resetAt) && previous.resetAt < observedAt) {
-      return previous.resetAt;
+    if (reset?.source === 'network' && Number.isFinite(reset.resetAt) && reset.resetAt > 0 && reset.resetAt <= 8.64e15) return reset.resetAt;
+    // A visible -> absent -> visible banner is fresh evidence. Continuous stale
+    // banners retain their old epoch; an unexpired network epoch still wins.
+    if (reset?.newCycle && previous?.resetAt <= observedAt) previous = null;
+    if (previous?.resetSource === 'network' && Number.isFinite(previous.resetAt)) {
+      const old = new Date(previous.resetAt);
+      if (previous.resetAt > observedAt || (old.getHours() === reset?.hour && old.getMinutes() === reset?.minute)) return previous.resetAt;
     }
-    const now = new Date(observedAt);
-    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), reset.hour, reset.minute, 0, 0);
-    if (target.getTime() <= observedAt && now.getHours() >= 23 && reset.hour < 2) target.setDate(target.getDate() + 1);
-    return target.getTime();
+    const parser = root.AIWiseFreeLimitParser;
+    return parser ? parser.getResetTimestamp(reset, new Date(observedAt), previous) : null;
   }
 
   function recordForObservation(account, reset, observedAt, previous) {
     const resetAt = resetTimestamp(reset, observedAt, previous);
-    const sameReset = previous && previous.resetLabel === reset.label && previous.resetAt === resetAt;
+    const sameReset = previous && previous.resetAt === resetAt;
     return {
       accountId: account.id,
       accountName: account.name || 'Claude account',
-      status: 'exhausted',
-      resetLabel: reset.label,
+      status: sameReset && previous?.status === 'likely_available' ? 'likely_available' : 'exhausted',
+      resetLabel: sameReset && previous?.resetSource === 'network' && reset.source !== 'network'
+        ? previous.resetLabel
+        : reset.label || (Number.isFinite(resetAt) ? new Date(resetAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null),
       resetAt,
+      resetSource: reset.source === 'network' || (sameReset && previous?.resetSource === 'network') ? 'network' : 'banner',
       limitObservedAt: sameReset && Number.isFinite(previous.limitObservedAt)
         ? previous.limitObservedAt
         : observedAt,
       lastSeenAt: observedAt,
+      ...(sameReset && previous.resetNotifiedFor === resetAt ? { resetNotifiedFor: resetAt } : {}),
     };
   }
 

@@ -4,7 +4,9 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(new URL('../AIWise/aiwise-patch/usage-state.js', `file://${__filename}`), 'utf8');
+const parserSource = fs.readFileSync(new URL('../AIWise/aiwise-patch/free-limit-parser.js', `file://${__filename}`), 'utf8');
 const context = { globalThis: {} };
+vm.runInNewContext(parserSource, context);
 vm.runInNewContext(source, context);
 const state = context.globalThis.AIWiseUsageState;
 
@@ -55,4 +57,23 @@ test('records without a valid observed interval remain unmeasured', () => {
   assert.equal(state.observedWaitProgress({ resetAt: 5_000 }, 2_000), null);
   assert.equal(state.observedWaitProgress({ limitObservedAt: 5_000, resetAt: 5_000 }, 5_000), null);
   assert.equal(state.observedWaitProgress({ limitObservedAt: 8_000, resetAt: 5_000 }, 7_000), null);
+});
+
+test('authoritative network epochs survive a conflicting DOM fallback', () => {
+  const now = new Date(2026, 10, 9, 20, 0).getTime();
+  const resetAt = now + 6 * 3600_000;
+  const first = state.recordForObservation({ id: 'a' }, { source: 'network', resetAt }, now);
+  const fallback = state.recordForObservation({ id: 'a' }, { label: '3:30 AM', hour: 3, minute: 30 }, now + 1000, first);
+  assert.equal(fallback.resetAt, resetAt);
+  assert.equal(fallback.resetSource, 'network');
+  assert.equal(fallback.resetLabel, first.resetLabel);
+});
+
+test('a fresh banner cycle can replace an expired same-clock reset', () => {
+  const firstAt = new Date(2026, 10, 8, 19, 0).getTime();
+  const reset = { label: '8:20 PM', hour: 20, minute: 20 };
+  const first = state.recordForObservation({id:'a'}, reset, firstAt);
+  const now = new Date(2026, 10, 9, 19, 0).getTime();
+  const fresh = state.recordForObservation({id:'a'}, {...reset, newCycle:true}, now, first);
+  assert.equal(fresh.resetAt, new Date(2026, 10, 9, 20, 20).getTime());
 });
