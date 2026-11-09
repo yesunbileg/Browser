@@ -4,8 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const donor = process.env.AIWISE_DONOR || '/home/home/.config/BraveSoftware/Brave-Browser/Profile 5/Extensions/aoefpjdgkiijhbnjkcmcoiaojbfdkoib/0.7.0_0';
-const output = process.env.AIWISE_OUTPUT || '/home/home/Documents/AIWise-Donor-Staging';
-const sourceRepo = path.resolve(here, '../claude-account-limits');
+const output = process.env.AIWISE_OUTPUT || '/home/home/Documents/AIWise-Free-Fix';
 
 if (!fs.existsSync(path.join(donor, 'manifest.json'))) throw new Error(`Donor not found: ${donor}`);
 const donorPath = path.resolve(donor);
@@ -16,7 +15,11 @@ if (donorPath === outputPath || donorPath.startsWith(outputPath + path.sep) || o
 const marker = path.join(output, '.aiwise-local-patch-output');
 if (fs.existsSync(output) && !fs.existsSync(marker)) throw new Error('Refusing to overwrite a directory not created by this patcher');
 fs.rmSync(output, { recursive: true, force: true });
-fs.cpSync(donor, output, { recursive: true, filter: (src) => !path.relative(donor, src).split(path.sep).includes('_metadata') });
+fs.cpSync(donor, output, { recursive: true, filter: (src) => {
+  const relative = path.relative(donor, src);
+  return !relative.split(path.sep).includes('_metadata')
+    && !['content-scripts/usage-widget.js', 'content-scripts/usage-widget.css'].includes(relative.split(path.sep).join('/'));
+} });
 fs.writeFileSync(marker, 'Generated local AIWise patch output. Original donor is unchanged.\n');
 
 const manifestPath = path.join(output, 'manifest.json');
@@ -83,9 +86,9 @@ fs.writeFileSync(popupHtml, html);
 const patchDir = path.join(output, 'aiwise-patch');
 fs.mkdirSync(patchDir, { recursive: true });
 for (const name of ['usage-state.js', 'free-limit-parser.js', 'account-limit-watcher.js']) {
-  fs.copyFileSync(path.join(sourceRepo, 'content-scripts', name), path.join(patchDir, name));
+  fs.copyFileSync(path.join(here, 'patch', name), path.join(patchDir, name));
 }
 for (const name of ['background.js', 'popup-account-area.js']) {
   fs.copyFileSync(path.join(here, 'patch', name), path.join(patchDir, name));
 }
-console.log(`Patched donor staged at ${output}`);
+console.log(`Updated extension at ${output}`);

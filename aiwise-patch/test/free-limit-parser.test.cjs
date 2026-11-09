@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync(new URL('../content-scripts/free-limit-parser.js', `file://${__filename}`), 'utf8');
+const source = fs.readFileSync(new URL('../patch/free-limit-parser.js', `file://${__filename}`), 'utf8');
 const context = { globalThis: {}, Date };
 vm.runInNewContext(source, context);
 const { parseResetBanner, getResetTimestamp } = context.globalThis.AIWiseFreeLimitParser;
